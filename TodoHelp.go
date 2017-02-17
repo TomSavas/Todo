@@ -6,63 +6,70 @@ import (
 )
 
 const (
+	ADD_P_FLAG_INFO = `Sets the priority of the task, system values (although custom can be typed in): top, mid, bot, none.
+             Default value - NONE. Values are case insensitive.`
+	ADD_S_FLAG_INFO = `Sets the state of the task, system values (although custom can be typed in): wip (work in progress), 
+             not-started, done, dead. Default value - NOT_STARTED. Values are case insensitive.`	
+	ADD_T_FLAG_INFO = `Sets the type of the task. Custom ones must be used, not that if multiple words are used, 
+             they must be typed between quotes. Default value - GENERAL.
+               e.g.
+               todo add -t "School tasks" "Prepare for final maths exam"
+               todo add -t Piano "Learn Maple leaf rag"`
+	ADD_N_FLAG_INFO = `Sets custom notes for the task.
+               e.g.
+               todo add -n "Tasks 1.100 through 1.125" "Solve physics problems"`	
 	ADD_COMMAND_USAGE = `add [OPTIONS] [TASK TEXT]
       Description:
         Adds a new task.
       Options:
-        -p   Sets the priority of the task, system values (although custom can be typed in): top, mid, bot, none.
-             Default value - NONE. Values are case insensitive.
-        -s   Sets the state of the task, system values (although custom can be typed int): wip (work in progress), 
-             not-started, done, dead. Default value - NOT_STARTED. Values are case insensitive.
-        -t   Sets the type of the task. Custom ones must be used, not that if multiple words are used, 
-             they must be typed between quotes. Default value - GENERAL.
-               e.g.
-               todo add -t "School tasks" "Prepare for final maths exam"
-               todo add -t Piano "Learn Maple leaf rag"
-        -n   Sets custom notes for the task.
-               e.g.
-               todo add -n "Tasks 1.100 through 1.125" "Solve physics problems"
-	`
+        -p   ` + ADD_P_FLAG_INFO + `
+        -s   ` + ADD_S_FLAG_INFO + `
+        -t   ` + ADD_T_FLAG_INFO + `
+        -n   ` + ADD_N_FLAG_INFO + `
+`
 
+	LS_P_FLAG_INFO = `Specify the priority, case insensitive, if priority contains multiple words, must be typed between quotes.
+             Multiple priorities must be typed between quotes and separated with commas. If not given any priorities prints
+             existing priorities.`
+	LS_S_FLAG_INFO = `Specify the state, case insensitive if state contains multiple words, must bet typed between quotes. 
+             Multiple states must be typed between quotes and separated with commas. If not given any states prints existing states.`
+	LS_T_FLAG_INFO = `Specify the type, case insensitive, if type contains multiple words, must be typed between quotes.
+             Multiple types must be typed between quotes and separated with commas. If not given any types prints existing types.
+               e.g.
+               todo ls -p TOP -s wip -t piano
+               todo ls -p "top, mid" -t "piano, school tasks"`
 	LS_COMMAND_USAGE = `ls [OPTIONS]
       Description:
           Lists todos specified by options. If not given any lists all todos.
       Options:
-        -p   Specify the priority, case insensitive, if priority contains multiple words, must be typed between quotes.
-             Multiple priorities must be typed between quotes and separated with commas. If not given any priorities prints
-             existing priorities.
-			
-        -s   Specify the state, case insensitive if state contains multiple words, must bet typed between quotes. 
-             Multiple states must be typed between quotes and separated with commas. If not given any states prints existing states.
+        -p   ` + LS_P_FLAG_INFO + `
+        -s   ` + LS_S_FLAG_INFO + `
+        -t   ` + LS_T_FLAG_INFO + `
+`
 
-        -t   Specify the type, case insensitive, if type contains multiple words, must be typed between quotes.
+	LSD_P_FLAG_INFO = `Specify the priority, case insensitive, if priority contains multiple words, must be typed between quotes.
+             Multiple priorities must be typed between quotes and separated with commas. If not given any priorities
+             prints existing priorities.`
+	LSD_T_FLAG_INFO = `Specify the type, case insensitive, if type contains multiple words, must be typed between quotes. 
              Multiple types must be typed between quotes and separated with commas. If not given any types prints existing types.
                e.g.
-               todo ls -p TOP -s wip -t piano
-               todo ls -p "top, mid" -t "piano, school tasks"
-	`
-
+               todo lsd -p TOP -t piano
+               todo lsd -p "top, mid" -t "piano, school tasks"`
 	LSD_COMMAND_USAGE = `lsd [OPTIONS]
       Description:
         Lists done todos. "ls -s done" can be used as an alternative.
       Options:
-        -p   Specify the priority, case insensitive, if priority contains multiple words, must be typed between quotes.
-             Multiple priorities must be typed between quotes and separated with commas. If not given any priorities
-             prints existing priorities.
+        -p   ` + LSD_P_FLAG_INFO + `
+        -t   ` + LSD_T_FLAG_INFO + `
+`
 
-        -t   Specify the type, case insensitive, if type contains multiple words, must be typed between quotes. 
-             Multiple types must be typed between quotes and separated with commas. If not given any types prints existing types.
-               e.g.
-               todo lsd -p TOP -t piano
-               todo lsd -p "top, mid" -t "piano, school tasks"
-	`
-
+	APPEND_N_FLAG_INFO = `Specifies that text will be appended to the note of the task.`
 	APPEND_COMMAND_USAGE = `append [OPTIONS] [ID] [TEXT_TO_APPEND]
       Description:
           Appends to task text or note of a todo with given ID. By default appends to the task of the todo.      
       Options:
-          -n   Specifies that text will be appended to the note of the task.
-	`
+          -n   ` + APPEND_N_FLAG_INFO + `
+`
 
 	RM_COMMAND_USAGE = `rm [ID]
       Description:
