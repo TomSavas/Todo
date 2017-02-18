@@ -6,8 +6,8 @@ import (
 )
 
 const (
-	ADD_P_FLAG_INFO = `Sets the priority of the task, system values (although custom can be typed in): top, mid, bot, none.
-             Default value - NONE. Values are case insensitive.`
+	ADD_P_FLAG_INFO = `Sets the priority of the task, system values (although custom can be typed in): top, mid, low.
+             Default value - MID. Values are case insensitive.`
 	ADD_S_FLAG_INFO = `Sets the state of the task, system values (although custom can be typed in): wip (work in progress), 
              not-started, done, dead. Default value - NOT_STARTED. Values are case insensitive.`	
 	ADD_T_FLAG_INFO = `Sets the type of the task. Custom ones must be used, not that if multiple words are used, 
@@ -29,12 +29,12 @@ const (
 `
 
 	LS_P_FLAG_INFO = `Specify the priority, case insensitive, if priority contains multiple words, must be typed between quotes.
-             Multiple priorities must be typed between quotes and separated with commas. If not given any priorities prints
+             Multiple priorities must be typed between quotes and separated with semicolons. If not given any priorities prints
              existing priorities.`
 	LS_S_FLAG_INFO = `Specify the state, case insensitive if state contains multiple words, must bet typed between quotes. 
-             Multiple states must be typed between quotes and separated with commas. If not given any states prints existing states.`
+             Multiple states must be typed between quotes and separated with semicolons. If not given any states prints existing states.`
 	LS_T_FLAG_INFO = `Specify the type, case insensitive, if type contains multiple words, must be typed between quotes.
-             Multiple types must be typed between quotes and separated with commas. If not given any types prints existing types.
+             Multiple types must be typed between quotes and separated with semicolons. If not given any types prints existing types.
                e.g.
                todo ls -p TOP -s wip -t piano
                todo ls -p "top, mid" -t "piano, school tasks"`
@@ -48,16 +48,16 @@ const (
 `
 
 	LSD_P_FLAG_INFO = `Specify the priority, case insensitive, if priority contains multiple words, must be typed between quotes.
-             Multiple priorities must be typed between quotes and separated with commas. If not given any priorities
+             Multiple priorities must be typed between quotes and separated with semicolons. If not given any priorities
              prints existing priorities.`
 	LSD_T_FLAG_INFO = `Specify the type, case insensitive, if type contains multiple words, must be typed between quotes. 
-             Multiple types must be typed between quotes and separated with commas. If not given any types prints existing types.
+             Multiple types must be typed between quotes and separated with semicolons. If not given any types prints existing types.
                e.g.
                todo lsd -p TOP -t piano
-               todo lsd -p "top, mid" -t "piano, school tasks"`
+               todo lsd -p "top; mid" -t "piano, school tasks"`
 	LSD_COMMAND_USAGE = `lsd [OPTIONS]
       Description:
-        Lists done todos. "ls -s done" can be used as an alternative.
+        Lists done todos. An alternative to "ls -s done".
       Options:
         -p   ` + LSD_P_FLAG_INFO + `
         -t   ` + LSD_T_FLAG_INFO + `
