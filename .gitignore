@@ -21,3 +21,4 @@
 
 # Unignore all dirs
 !*/
+*.db
