@@ -180,6 +180,10 @@ func AddTodo(todo Todo) {
 	db.Exec(fmt.Sprintf("INSERT INTO todos VALUES(%v, \"%v\", \"%v\", \"%v\", \"%v\", \"%v\")", GetLastID() + 1, todo.Task, todo.Priority, todo.Status, todo.Type, todo.Notes))
 }
 
+func RemoveTodo(id string) {
+	db.Exec("DELETE FROM todos WHERE ID=" + id + ";")
+}
+
 func GetLastID() int {
 	response, err := db.Query("SELECT * FROM todos WHERE ID = (SELECT MAX(ID) FROM todos);")
 	if err != nil {
@@ -189,4 +193,28 @@ func GetLastID() int {
 	var rowid int64
 	response.Scan(&rowid, make(sqlite3.RowMap))
 	return int(rowid)
+}
+
+func ChangeField(id, field, value string) {
+	db.Exec("UPDATE todos SET " + field + "=\"" + value + "\" WHERE ID = " + id + ";")
+}
+
+func ChangePriority(id, priority string) {
+	ChangeField(id, "Priority", priority)
+}
+
+func ChangeStatus(id, status string) {
+	ChangeField(id, "Status", status)
+}
+
+func ChangeType(id, types string) {
+	ChangeField(id, "Type", types)
+}
+
+func ChangeNote(id, note string) {
+	ChangeField(id, "Note", note)
+}
+
+func ChangeTask(id, task string) {
+	ChangeField(id, "Task", task)
 }
