@@ -2,10 +2,12 @@ package main
 
 import (
 	"fmt"
+	"strings"
+	"regexp"
 )
 
 type Todo struct {
-	Id int64 
+	Id int 
 	Task string
 	Priority string
 	Status string
@@ -22,11 +24,19 @@ func (todo1 Todo) Equals(todo2 Todo) bool {
 	return false
 }
 
+func FormatParameters(src string) string {
+	query, _ := regexp.Compile("\\s*?;+?\\s*")
+	return "{" + strings.Join(query.Split(strings.ToUpper(src), -1), "} {") + "}"
+}
+
 func (todo *Todo) Print() {
-	fmt.Println(fmt.Sprintf("%v. %v \nPriority: %v	Type: %v	Status: %v \n%v", todo.Id, todo.Task, todo.Priority, todo.Type, todo.Status, todo.Notes))
+	fmt.Println(fmt.Sprintf("%v. %v \nPriority: %v	Type: %v	Status: %v \n%v", todo.Id, todo.Task, FormatParameters(todo.Priority), FormatParameters(todo.Type), FormatParameters(todo.Status), todo.Notes))
 }
 
 func Print(todos []Todo) {
+	if cap(todos) == 0 {
+		fmt.Println("No todos found with such parameters.")
+	}
 	for _, todo := range todos {
 		todo.Print()
 	}
