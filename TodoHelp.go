@@ -63,6 +63,22 @@ const (
         -t   ` + LSD_T_FLAG_INFO + `
 `
 
+	LSW_P_FLAG_INFO = `Specify the priority, case insensitive, if priority contains multiple words, must be typed between quotes.
+             Multiple priorities must be typed between quotes and separated with semicolons. If not given any priorities
+             prints existing priorities.`
+	LSW_T_FLAG_INFO = `Specify the type, case insensitive, if type contains multiple words, must be typed between quotes. 
+             Multiple types must be typed between quotes and separated with semicolons. If not given any types prints existing types.
+               e.g.
+               todo lsw -p TOP -t piano
+               todo lsw -p "top; mid" -t "piano, school tasks"`
+	LSW_COMMAND_USAGE = `lsw [OPTIONS]
+      Description:
+        Lists wip (work in progress) todos. An alternative to "ls -s wip".
+      Options:
+        -p   ` + LSW_P_FLAG_INFO + `
+        -t   ` + LSW_T_FLAG_INFO + `
+`
+
 	APPEND_N_FLAG_INFO = `Specifies that text will be appended to the note of the task.`
 	APPEND_COMMAND_USAGE = `append [OPTIONS] [ID] [TEXT_TO_APPEND]
       Description:
@@ -109,11 +125,14 @@ const (
 	HINT_FOR_HELP = "Type \"todo help\" or \"todo -h\" for help. Type \"todo -h [COMMAND]\" for specific information about the command."
 )
 
+var ZeroArgumentsGiven string = "0 arguments given. " + HINT_FOR_HELP
+
 var UsageHelp string = `Usage: todo [COMMAND]
   Commands:
     ` + ADD_COMMAND_USAGE + `
     ` + LS_COMMAND_USAGE + `
-    ` + LSD_COMMAND_USAGE + `		
+    ` + LSD_COMMAND_USAGE + `
+    ` + LSW_COMMAND_USAGE + `		
     ` + APPEND_COMMAND_USAGE + `		
     ` + RM_COMMAND_USAGE + `
     ` + CHPRI_COMMAND_USAGE + `		 
@@ -131,6 +150,8 @@ func PrintSpecificInfo(command string) {
 		fmt.Println(LS_COMMAND_USAGE)
 	case "lsd":
 		fmt.Println(LSD_COMMAND_USAGE)
+	case "lsw":
+		fmt.Println(LSW_COMMAND_USAGE)
 	case "append":
 		fmt.Println(APPEND_COMMAND_USAGE)
 	case "rm":
