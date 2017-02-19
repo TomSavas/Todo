@@ -9,6 +9,10 @@ import (
 )
 
 func Split(src string) []string {
+	if len(src) == 0 {
+		return []string{}
+	}
+
 	query, _ := regexp.Compile("\\s*?;+?\\s*")
 	return query.Split(src, -1)
 }
@@ -19,6 +23,12 @@ func AddCommand() {
 	types := flag.String("t", "general", ADD_T_FLAG_INFO)
 	notes := flag.String("n", "", ADD_N_FLAG_INFO)	
 	flag.Parse()
+	if len(flag.Args()) == 0 {
+		fmt.Println(ZeroArgumentsGiven)
+		return
+	}
+	todo := Todo{0, strings.Join(flag.Args(), " "), *priority, *status, *types, *notes}
+	AddTodo(todo)
 }
 
 func LsCommand() {
@@ -26,14 +36,21 @@ func LsCommand() {
 	status := flag.String("s", "", LS_S_FLAG_INFO)
 	types := flag.String("t", "", LS_T_FLAG_INFO)
 	flag.Parse()
-	Print(GetTodos(Split(priority), Split(status), Split(types)))
+	Print(GetTodos(Split(*priority), Split(*status), Split(*types)))
 }
 
 func LsdCommand() {
-	priority := flag.String("p", "none", LSD_P_FLAG_INFO)
-	task := flag.String("t", "general", LSD_T_FLAG_INFO)
+	priority := flag.String("p", "", LSD_P_FLAG_INFO)
+	types := flag.String("t", "", LSD_T_FLAG_INFO)
 	flag.Parse()
-	_, _ = priority, task
+	Print(GetTodos(Split(*priority), []string{"done"}, Split(*types)))
+}
+
+func LswCommand() {
+	priority := flag.String("p", "", LSD_P_FLAG_INFO)
+	types := flag.String("t", "", LSD_T_FLAG_INFO)
+	flag.Parse()
+	Print(GetTodos(Split(*priority), []string{"wip"}, Split(*types)))
 }
 
 func AppendCommand() {
@@ -43,31 +60,43 @@ func AppendCommand() {
 }
 
 func RmCommand() {
-
+	//add validation
+	RemoveTodo(os.Args[1])
 }
 
 func ChpriCommand() {
-
+	//add validation
+	flag.Parse()
+	ChangePriority(flag.Args()[0], strings.Join(flag.Args()[1:], " "))
 }
 
 func ChstatCommand() {
-
+	//add validation
+	flag.Parse()
+	ChangeStatus(flag.Args()[0], strings.Join(flag.Args()[1:], " "))
 }
 
 func ChtypeCommand() {
-
+	//add validation
+	flag.Parse()
+	ChangeType(flag.Args()[0], strings.Join(flag.Args()[1:], " "))
 }
 
 func ChnoteCommand() {
-
+	//add validation
+	flag.Parse()
+	ChangeNote(flag.Args()[0], strings.Join(flag.Args()[1:], " "))
 }
 
 func ChtaskCommand() {
-
+	//add validation
+	flag.Parse()
+	ChangeTask(flag.Args()[0], strings.Join(flag.Args()[1:], " "))
 }
 
 func DoneCommand() {
-
+	//add validation
+	ChangeStatus(os.Args[1], "done")
 }
 
 
@@ -89,6 +118,8 @@ func DetectCommand(args []string) {
 		LsCommand()
 	case "lsd":
 		LsdCommand()
+	case "lsw":
+		LswCommand()
 	case "append":
 		AppendCommand()
 	case "rm":
