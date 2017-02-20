@@ -5,9 +5,20 @@ import (
 	"github.com/mxk/go-sqlite/sqlite3"
 	"os"
 	"strings"
+	"regexp"
+	"os/exec"
+	"os/user"
 )
 
-const databaseName = "todos.db"
+var databasePath string
+
+func GetDatabasePath() {
+	usr, err := user.Current()
+	if err != nil {
+		fmt.Println(err)
+	}
+	databasePath = usr.HomeDir + "/.todos.db"
+}
 
 func CheckIfFileExists(filename string) bool {
 	if _, err := os.Stat(filename); err != nil {
@@ -17,7 +28,7 @@ func CheckIfFileExists(filename string) bool {
 }
 
 func OpenDatabase(){
-	if CheckIfFileExists(databaseName) {
+	if CheckIfFileExists(databasePath) {
 		ResetDatabase()
 		return
 	}
@@ -27,7 +38,7 @@ func OpenDatabase(){
 var db *sqlite3.Conn
 func CreateDatabaseReference() {
 	var err error
-	db, err = sqlite3.Open(databaseName)
+	db, err = sqlite3.Open(databasePath)
 	_ = err
 }
 
@@ -37,7 +48,7 @@ func CreateDatabase() {
 
 func DeleteDatabase() {
 	CloseDatabase()
-	os.Remove(databaseName)
+	os.Remove(databasePath)
 }
 
 func ResetDatabase() {
@@ -52,38 +63,28 @@ func CloseDatabase() {
 	}
 }
 
-func GetTodoById(id int) Todo {
-	query := "SELECT * FROM todos WHERE ID LIKE " + string(id)
-	_ = query
-	return Todo{}
+func BackupDatabase(){
+	command := exec.Command("cp", databasePath, databasePath+".bak")
+	_ = command.Run()
 }
 
-func GetTodoByPriorities(priorities []string) []Todo {
-	var query string
-	if len(priorities) == 0 {
-		query = "SELECT * FROM todos"
-	} else {
-		query = "SELECT * FROM todos WHERE Priority LIKE \"%" + strings.Join(priorities, "%\" OR Priority LIKE \"%") + "%\""
-	}
-	return GetTodosFromQuery(query)
+func RestoreDatabase(){
+	command := exec.Command("rm", databasePath)
+	_ = command.Run()
+	command = exec.Command("cp", databasePath+".bak", databasePath)
+	_ = command.Run()
 }
 
-func GetTodoByStatuses(statuses []string) []Todo {
+func GetTodosBy(parameter string, values []string) []Todo {
 	var query string
-	if len(statuses) == 0 {
+	if len(values) == 0 {
 		query = "SELECT * FROM todos"
 	} else {
-		query = "SELECT * FROM todos WHERE Status LIKE \"%" + strings.Join(statuses, "%\" OR Status LIKE \"%") + "%\""
-	}
-	return GetTodosFromQuery(query)
-}
-
-func GetTodoByTypes(types []string) []Todo {
-	var query string
-	if len(types) == 0 {
-		query = "SELECT * FROM todos"
-	} else {
-		query = "SELECT * FROM todos WHERE Type LIKE \"%" + strings.Join(types, "%\" OR Type LIKE \"%") + "%\""
+		if NaiveSqlInjectionsCheck(values) {
+			fmt.Println(POSSIBLE_SQL_INJECTION_ERROR)
+			return []Todo{}
+		}
+		query = "SELECT * FROM todos WHERE " + parameter + " LIKE \"%" + strings.Join(values, "%\" OR Status LIKE \"%") + "%\""
 	}
 	return GetTodosFromQuery(query)
 }
@@ -173,10 +174,14 @@ func GetTodos(priorities, statuses, types []string) []Todo {
 		return todos
 	}
 
-	return IntersectArrays(GetTodoByPriorities(priorities), GetTodoByStatuses(statuses), GetTodoByTypes(types))
+	return IntersectArrays(GetTodosBy("Priority", priorities), GetTodosBy("Status", statuses), GetTodosBy("Type", types))
 }
 
 func AddTodo(todo Todo) {
+	if NaiveSqlInjectionsCheck([]string{todo.Task, todo.Priority, todo.Status, todo.Type, todo.Notes}) {
+		fmt.Println(POSSIBLE_SQL_INJECTION_ERROR)
+		return
+	}
 	db.Exec(fmt.Sprintf("INSERT INTO todos VALUES(%v, \"%v\", \"%v\", \"%v\", \"%v\", \"%v\")", GetLastID() + 1, todo.Task, todo.Priority, todo.Status, todo.Type, todo.Notes))
 }
 
@@ -196,6 +201,32 @@ func GetLastID() int {
 }
 
 func ChangeField(id, field, value string) {
-	//FIX SQL INJECTION
-	db.Exec("UPDATE todos SET " + field + "=\"" + value + "\" WHERE ID = " + id + ";")
+	if NaiveSqlInjectionCheck(value) {
+		fmt.Println(POSSIBLE_SQL_INJECTION_ERROR)
+		return
+	}
+	db.Exec("UPDATE todos SET " + field + "=\"" + value + "\" WHERE ID = " + id + ";")	
+}
+
+func NaiveSqlInjectionCheck(s string) bool {
+	s = strings.ToUpper(s)
+	if found, _ := regexp.MatchString("DROP\\sTABLE", s); found {
+		return true
+	} else if found, _ := regexp.MatchString("\\\"", s); found {
+		return true
+	} else if found, _ := regexp.MatchString("DELETE\\sFROM", s); found {
+		return true
+	} else if found, _ := regexp.MatchString("\\s--", s); found {
+		return true
+	}
+	return false
+}
+
+func NaiveSqlInjectionsCheck(s []string) bool {
+	for _, value := range s {
+		if (NaiveSqlInjectionCheck(value)) {
+			return true
+		}
+	}
+	return false
 }
