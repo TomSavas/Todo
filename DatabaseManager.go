@@ -196,25 +196,6 @@ func GetLastID() int {
 }
 
 func ChangeField(id, field, value string) {
+	//FIX SQL INJECTION
 	db.Exec("UPDATE todos SET " + field + "=\"" + value + "\" WHERE ID = " + id + ";")
-}
-
-func ChangePriority(id, priority string) {
-	ChangeField(id, "Priority", priority)
-}
-
-func ChangeStatus(id, status string) {
-	ChangeField(id, "Status", status)
-}
-
-func ChangeType(id, types string) {
-	ChangeField(id, "Type", types)
-}
-
-func ChangeNote(id, note string) {
-	ChangeField(id, "Note", note)
-}
-
-func ChangeTask(id, task string) {
-	ChangeField(id, "Task", task)
 }
