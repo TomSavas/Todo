@@ -17,6 +17,25 @@ func Split(src string) []string {
 	return query.Split(src, -1)
 }
 
+func ValidateID(id string) bool {
+	if found, _ := regexp.MatchString("[^\\d\\s]+", id); found {
+		fmt.Println(ID_CANT_CONTAIN_LETTERS, HINT_FOR_HELP)
+		return false
+	} else if found, _ = regexp.MatchString("\\s+", id); found{
+		fmt.Println(ID_CANT_CONTAIN_SPACES, HINT_FOR_HELP)
+	}
+	return true
+}
+
+func ValidateIDs (ids []string) bool {
+	for _, id := range ids {
+		if !ValidateID(id){
+			return false
+		}
+	}
+	return true
+}
+
 func AddCommand() {
 	priority := flag.String("p", "top", ADD_P_FLAG_INFO)
 	status := flag.String("s", "not_started", ADD_S_FLAG_INFO)
@@ -27,6 +46,11 @@ func AddCommand() {
 		fmt.Println(ZeroArgumentsGiven)
 		return
 	}
+
+	if len(*notes) != 0 {
+		*notes += "\n"
+	}
+
 	todo := Todo{0, strings.Join(flag.Args(), " "), *priority, *status, *types, *notes}
 	AddTodo(todo)
 }
@@ -60,45 +84,21 @@ func AppendCommand() {
 }
 
 func RmCommand() {
-	//add validation
-	RemoveTodo(os.Args[1])
+	fmt.Println(os.Args)
+	if ValidateIDs(strings.Split(os.Args[1], " ")) {
+		for _, id := range strings.Split(os.Args[1], " ") {
+			RemoveTodo(id)
+		}
+	}
 }
 
-func ChpriCommand() {
-	//add validation
-	flag.Parse()
-	ChangePriority(flag.Args()[0], strings.Join(flag.Args()[1:], " "))
+func ChCommand(field, value string) {
+	if ValidateIDs(strings.Split(os.Args[1], " ")){
+		for _, id := range strings.Split(os.Args[1], " ") {
+			ChangeField(id, field, value)
+		}
+	}	
 }
-
-func ChstatCommand() {
-	//add validation
-	flag.Parse()
-	ChangeStatus(flag.Args()[0], strings.Join(flag.Args()[1:], " "))
-}
-
-func ChtypeCommand() {
-	//add validation
-	flag.Parse()
-	ChangeType(flag.Args()[0], strings.Join(flag.Args()[1:], " "))
-}
-
-func ChnoteCommand() {
-	//add validation
-	flag.Parse()
-	ChangeNote(flag.Args()[0], strings.Join(flag.Args()[1:], " "))
-}
-
-func ChtaskCommand() {
-	//add validation
-	flag.Parse()
-	ChangeTask(flag.Args()[0], strings.Join(flag.Args()[1:], " "))
-}
-
-func DoneCommand() {
-	//add validation
-	ChangeStatus(os.Args[1], "done")
-}
-
 
 func DetectCommand(args []string) {
 	if len(args) < 2 {
@@ -122,20 +122,26 @@ func DetectCommand(args []string) {
 		LswCommand()
 	case "append":
 		AppendCommand()
+	case "del":
+		fallthrough
 	case "rm":
 		RmCommand()
 	case "chpri":
-		ChpriCommand()
-	case "chstat":
-		ChstatCommand()
+		fallthrough
+	case "chpriority":
+		ChCommand("Priority", os.Args[2])
+	case "chst":
+		fallthrough
+	case "chstatus":
+		ChCommand("Status", os.Args[2])
 	case "chtype":
-		ChtypeCommand()
+		ChCommand("Type", os.Args[2])
 	case "chnote":
-		ChnoteCommand()
+		ChCommand("Note", os.Args[2])
 	case "chtask":
-		ChtaskCommand()
+		ChCommand("Task", os.Args[2])
 	case "done":
-		DoneCommand()
+		ChCommand("Status", "done")
 	case "help":
 		fallthrough
 	case "-h":
