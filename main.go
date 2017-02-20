@@ -5,6 +5,7 @@ import (
 )
 
 func main() {
+	GetDatabasePath()
 	OpenDatabase()
 	defer CloseDatabase()
 	DetectCommand(os.Args)
