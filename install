@@ -1,0 +1,6 @@
+#!/bin/bash
+
+go get github.com/mxk/go-sqlite/sqlite3
+go build main.go DatabaseManager.go InputManager.go Todo.go TodoHelp.go
+sudo mv main /usr/bin/todo
+echo "This folder can now be deleted. Program can be accessed via todo command in terminal."
