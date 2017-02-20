@@ -37,7 +37,7 @@ const (
              Multiple types must be typed between quotes and separated with semicolons. If not given any types prints existing types.
                e.g.
                todo ls -p TOP -s wip -t piano
-               todo ls -p "top, mid" -t "piano, school tasks"`
+               todo ls -p "top; mid" -t "piano, school tasks"`
 	LS_COMMAND_USAGE = `ls [OPTIONS]
       Description:
           Lists todos specified by options. If not given any lists all todos.
@@ -87,42 +87,49 @@ const (
           -n   ` + APPEND_N_FLAG_INFO + `
 `
 
-	RM_COMMAND_USAGE = `rm [ID]
+	RM_COMMAND_USAGE = `rm [ID] OR del [ID]
       Description:
-        Deletes todo with a given id.
+        Deletes todo(s) with a given ID(s). Multiple IDs can be given and must be written between quotes and separated with spaces.
 	`
 
-	CHPRI_COMMAND_USAGE = `chpri [ID] [PRIORITY]
+	CHPRI_COMMAND_USAGE = `chpriority [ID] [PRIORITY] OR chpri [ID] [PRIORITY]
       Description:
-        Changes priority of a todo with given ID. If priority is not specified, sets it to default.
+        Changes priority of a todo(s) with given ID(s). If priority is not specified, sets it to default.  Multiple IDs 
+        can be given and must be written between quotes and separated with spaces.
 	`
 
-	CHSTAT_COMMAND_USAGE = `chstat [ID] [STATE]
+	CHSTAT_COMMAND_USAGE = `chstatus [ID] [STATUS] OR chst [ID] [STATUS]
       Description:
-        Changes state of a todo with given ID. If state is not specified, sets it to default.
+        Changes status of a todo(s) with given ID(s). If state is not specified, sets it to default. Multiple IDs can be
+        given and must be written between quotes and separated with spaces.
 	`
 
 	CHTYPE_COMMAND_USAGE = `chtype [ID] [TYPE]
       Description:
-        Changes type of a todo with given ID. If state is not specified, sets it to default.
+        Changes type of a todo(s) with given ID(s). If state is not specified, sets it to default. Multiple IDs can be 
+        given and must be written between quotes and separated with spaces.
 	`
 
 	CHNOTE_COMMAND_USAGE = `chnote [ID] [NOTE]
       Description:
-        Overrides the note of a todo with given ID. If note is not specified, removes it.
+        Overrides the note of a todo(s) with given ID(s). If note is not specified, removes it.  Multiple IDs can be
+        given and must be written between quotes and separated with spaces.
 	`
 
 	CHTASK_COMMAND_USAGE = `chtask [ID] [TASK]
       Description:
-        Overrides the task of a todo with given ID. Task must be given.
+        Overrides the task of a todo(s) with given ID(s). Task must be given.  Multiple IDs can be given and must be 
+        written between quotes and separated with spaces.
 	`
 
 	DONE_COMMAND_USAGE = `done [ID]
       Description:
-        Sets todo's state to done.
+        Sets todo's state to done. Multiple IDs can be given and must be written between quotes and separated with spaces.
 	`
 
 	HINT_FOR_HELP = "Type \"todo help\" or \"todo -h\" for help. Type \"todo -h [COMMAND]\" for specific information about the command."
+	ID_CANT_CONTAIN_LETTERS = "ID cannot contain letters."
+	ID_CANT_CONTAIN_SPACES = "ID cannot contain spaces."
 )
 
 var ZeroArgumentsGiven string = "0 arguments given. " + HINT_FOR_HELP
