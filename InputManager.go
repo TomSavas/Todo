@@ -142,6 +142,12 @@ func DetectCommand(args []string) {
 		ChCommand("Task", os.Args[2])
 	case "done":
 		ChCommand("Status", "done")
+	case "backup":
+		CloseDatabase()
+		BackupDatabase()
+	case "restore":
+		CloseDatabase()
+		RestoreDatabase()
 	case "help":
 		fallthrough
 	case "-h":

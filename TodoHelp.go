@@ -127,9 +127,20 @@ const (
         Sets todo's state to done. Multiple IDs can be given and must be written between quotes and separated with spaces.
 	`
 
+	BACKUP_COMMAND_USAGE = `backup
+	  Description:
+	    Makes a backup file of the todo database.
+	`
+
+	RESTORE_COMMAND_USAGE = `restore
+	  Description:
+	    Restores todo database from backup file.
+	`
+
 	HINT_FOR_HELP = "Type \"todo help\" or \"todo -h\" for help. Type \"todo -h [COMMAND]\" for specific information about the command."
 	ID_CANT_CONTAIN_LETTERS = "ID cannot contain letters."
 	ID_CANT_CONTAIN_SPACES = "ID cannot contain spaces."
+	POSSIBLE_SQL_INJECTION_ERROR = "Do not use \\\" double dashes or \"DROP TABLE\", \"DELETE FROM\"."
 )
 
 var ZeroArgumentsGiven string = "0 arguments given. " + HINT_FOR_HELP
@@ -147,7 +158,9 @@ var UsageHelp string = `Usage: todo [COMMAND]
     ` + CHTYPE_COMMAND_USAGE + `
     ` + CHNOTE_COMMAND_USAGE + `
     ` + CHTASK_COMMAND_USAGE + `
-    ` + DONE_COMMAND_USAGE
+    ` + DONE_COMMAND_USAGE + `
+    ` + BACKUP_COMMAND_USAGE + `
+    ` + RESTORE_COMMAND_USAGE
 
 func PrintSpecificInfo(command string) {
 	switch strings.ToLower(command) {
@@ -161,11 +174,17 @@ func PrintSpecificInfo(command string) {
 		fmt.Println(LSW_COMMAND_USAGE)
 	case "append":
 		fmt.Println(APPEND_COMMAND_USAGE)
+	case "del":
+		fallthrough
 	case "rm":
 		fmt.Println(RM_COMMAND_USAGE)
 	case "chpri":
+		fallthrough
+	case "chpriority":
 		fmt.Println(CHPRI_COMMAND_USAGE)
-	case "chstat":
+	case "chst":
+		fallthrough
+	case "chstatus":
 		fmt.Println(CHSTAT_COMMAND_USAGE)
 	case "chtype":
 		fmt.Println(CHTYPE_COMMAND_USAGE)
@@ -175,6 +194,10 @@ func PrintSpecificInfo(command string) {
 		fmt.Println(CHTASK_COMMAND_USAGE)
 	case "done":
 		fmt.Println(DONE_COMMAND_USAGE)
+	case "backup":
+		fmt.Println(BACKUP_COMMAND_USAGE)
+	case "restore":
+		fmt.Println(RESTORE_COMMAND_USAGE)
 	default:
 		fmt.Println(command, "command was not recognized.", HINT_FOR_HELP)
 	}	
