@@ -30,7 +30,7 @@ func FormatParameters(src string) string {
 }
 
 func (todo *Todo) Print() {
-	fmt.Println(fmt.Sprintf("%v. %v \nPriority: %v	Type: %v	Status: %v \n%v", todo.Id, todo.Task, FormatParameters(todo.Priority), FormatParameters(todo.Type), FormatParameters(todo.Status), todo.Notes))
+	fmt.Print(fmt.Sprintf("%v. %v \nPriority: %v	Type: %v	Status: %v \n%v\n", todo.Id, todo.Task, FormatParameters(todo.Priority), FormatParameters(todo.Type), FormatParameters(todo.Status), todo.Notes))
 }
 
 func Print(todos []Todo) {
