@@ -79,14 +79,6 @@ const (
         -t   ` + LSW_T_FLAG_INFO + `
 `
 
-	APPEND_N_FLAG_INFO = `Specifies that text will be appended to the note of the task.`
-	APPEND_COMMAND_USAGE = `append [OPTIONS] [ID] [TEXT_TO_APPEND]
-      Description:
-          Appends to task text or note of a todo with given ID. By default appends to the task of the todo.      
-      Options:
-          -n   ` + APPEND_N_FLAG_INFO + `
-`
-
 	RM_COMMAND_USAGE = `rm [ID] OR del [ID]
       Description:
         Deletes todo(s) with a given ID(s). Multiple IDs can be given and must be written between quotes and separated with spaces.
@@ -151,7 +143,6 @@ var UsageHelp string = `Usage: todo [COMMAND]
     ` + LS_COMMAND_USAGE + `
     ` + LSD_COMMAND_USAGE + `
     ` + LSW_COMMAND_USAGE + `		
-    ` + APPEND_COMMAND_USAGE + `		
     ` + RM_COMMAND_USAGE + `
     ` + CHPRI_COMMAND_USAGE + `		 
     ` + CHSTAT_COMMAND_USAGE + `
@@ -172,8 +163,6 @@ func PrintSpecificInfo(command string) {
 		fmt.Println(LSD_COMMAND_USAGE)
 	case "lsw":
 		fmt.Println(LSW_COMMAND_USAGE)
-	case "append":
-		fmt.Println(APPEND_COMMAND_USAGE)
 	case "del":
 		fallthrough
 	case "rm":

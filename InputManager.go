@@ -77,12 +77,6 @@ func LswCommand() {
 	Print(GetTodos(Split(*priority), []string{"wip"}, Split(*types)))
 }
 
-func AppendCommand() {
-	priority := flag.String("n", "task", APPEND_N_FLAG_INFO)
-	flag.Parse()
-	_ = priority 
-}
-
 func RmCommand() {
 	fmt.Println(os.Args)
 	if ValidateIDs(strings.Split(os.Args[1], " ")) {
@@ -120,8 +114,6 @@ func DetectCommand(args []string) {
 		LsdCommand()
 	case "lsw":
 		LswCommand()
-	case "append":
-		AppendCommand()
 	case "del":
 		fallthrough
 	case "rm":
