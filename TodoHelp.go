@@ -6,7 +6,8 @@ import (
 )
 
 const (
-  NO_COMMAND_USAGE = `todo with no command prints top n todos. Default - 7. Amount can be changed via todo [NUMBER]
+  NO_COMMAND_USAGE = `todo with no command prints top n todos. Default - 7. Amount can be changed via todo [NUMBER].
+             Use todo ls in order to get more information about the todo. 
                e.g.
                todo 5
   `
