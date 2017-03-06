@@ -7,17 +7,18 @@ import (
 	"strings"
 	"regexp"
 	"os/exec"
-	"os/user"
+	// "os/user"
 )
 
 var databasePath string
 
 func GetDatabasePath() {
-	usr, err := user.Current()
-	if err != nil {
-		fmt.Println(err)
-	}
-	databasePath = usr.HomeDir + "/.todos.db"
+	// usr, err := user.Current()
+	// if err != nil {
+	// 	fmt.Println(err)
+	// }
+	// databasePath = usr.HomeDir + "/.todos.db"
+	databasePath = "todos.db"
 }
 
 func CheckIfFileExists(filename string) bool {
@@ -43,7 +44,9 @@ func CreateDatabaseReference() {
 }
 
 func CreateDatabase() {
-	db.Exec("CREATE TABLE `todos` (`ID` INTEGER, `Task` TEXT, `Priority` TEXT, `Status` TEXT, `Type` TEXT, `Notes` TEXT, PRIMARY KEY(ID));")
+	db.Exec("CREATE TABLE `todos` (`ID`	INTEGER, `Task`	TEXT, `Time`	INTEGER, `Priority`	TEXT, `Status`	TEXT, `Type`	TEXT, `Notes`	TEXT, PRIMARY KEY(ID));")
+	db.Exec("CREATE TABLE `parameters` (`ID`	INTEGER, `DefaultLength`	INTEGER, PRIMARY KEY(ID));")
+	db.Exec("INSERT INTO Parameters VALUES(1, 7)")
 }
 
 func DeleteDatabase() {
@@ -77,7 +80,7 @@ func RestoreDatabase(){
 
 func GetTodosBy(parameter string, values []string) []Todo {
 	var query string
-	if len(values) == 0 {
+	if len(values) == 0 || parameter == "" {
 		query = "SELECT * FROM todos"
 	} else {
 		if NaiveSqlInjectionsCheck(values) {
@@ -104,7 +107,8 @@ func GetTodosFromQuery(query string) []Todo {
 	for s, err := db.Query(query); err == nil; err = s.Next() {
 		var rowid int64
 		s.Scan(&rowid, row)
-		todos = append(todos, Todo{int(rowid), CastToString(row["Task"]), CastToString(row["Priority"]), CastToString(row["Status"]), CastToString(row["Type"]), CastToString(row["Notes"])})
+		// todos = append(todos, Todo{int(rowid), CastToString(row["Task"]), CastToString(row["Priority"]), CastToString(row["Status"]), CastToString(row["Type"]), CastToString(row["Note"])})
+		todos = append(todos, *NewTodo(int(rowid), row["Time"].(int64), CastToString(row["Task"]), CastToString(row["Priority"]), CastToString(row["Status"]), CastToString(row["Type"]), CastToString(row["Notes"])))
 	}
 
 	return todos
@@ -178,11 +182,11 @@ func GetTodos(priorities, statuses, types []string) []Todo {
 }
 
 func AddTodo(todo Todo) {
-	if NaiveSqlInjectionsCheck([]string{todo.Task, todo.Priority, todo.Status, todo.Type, todo.Notes}) {
+	if NaiveSqlInjectionsCheck([]string{todo.Task, todo.Priority, todo.Status, todo.Type, todo.Note}) {
 		fmt.Println(POSSIBLE_SQL_INJECTION_ERROR)
 		return
 	}
-	db.Exec(fmt.Sprintf("INSERT INTO todos VALUES(%v, \"%v\", \"%v\", \"%v\", \"%v\", \"%v\")", GetLastID() + 1, todo.Task, todo.Priority, todo.Status, todo.Type, todo.Notes))
+	db.Exec(fmt.Sprintf("INSERT INTO todos VALUES(%v, \"%v\", %v, \"%v\", \"%v\", \"%v\", \"%v\")", GetLastID() + 1, todo.Task, todo.Time, todo.Priority, todo.Status, todo.Type, todo.Note))
 }
 
 func RemoveTodo(id string) {
@@ -198,6 +202,43 @@ func GetLastID() int {
 	var rowid int64
 	response.Scan(&rowid, make(sqlite3.RowMap))
 	return int(rowid)
+}
+
+func GetOldestTime(isWip bool) int64 {
+	response, err := db.Query("SELECT * FROM todos WHERE Time = (SELECT MIN(Time) FROM (SELECT * FROM todos WHERE Status LIKE \"wip\"))")
+
+	if !isWip {
+		response, err = db.Query("SELECT * FROM todos WHERE Time = (SELECT MIN(Time) FROM (SELECT * FROM todos WHERE Status LIKE \"not_started\"))")
+	}
+
+	if err != nil {
+		return 0
+	}
+
+	var rowid int64
+	row := make(sqlite3.RowMap)
+	response.Scan(&rowid, row)
+	return row["Time"].(int64)
+}
+
+func GetDefaultPrintLength() int {
+	response, err := db.Query("SELECT * FROM Parameters;")
+	if err != nil {
+		return 0
+	}
+
+	var rowid int64
+	row := make(sqlite3.RowMap)
+	response.Scan(&rowid, row)
+	return int(row["DefaultLength"].(int64))
+}
+
+func SetDefaultPrintLength(length string) {
+	if NaiveSqlInjectionCheck(length) {
+		fmt.Println(POSSIBLE_SQL_INJECTION_ERROR)
+		return
+	}
+	db.Exec("UPDATE parameters SET DefaultLength" + "=\"" + length + "\" WHERE ID = 1;")
 }
 
 func ChangeField(id, field, value string) {

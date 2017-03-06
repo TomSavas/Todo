@@ -5,35 +5,20 @@ import (
 	"flag"
 	"strings"
 	"os"
-	"regexp"
+	"time"
 )
 
-func Split(src string) []string {
-	if len(src) == 0 {
-		return []string{}
-	}
-
-	query, _ := regexp.Compile("\\s*?;+?\\s*")
-	return query.Split(src, -1)
+func PrintDefaultAmountOfTodos() {
+	PrintNTodos(GetDefaultPrintLength())
 }
 
-func ValidateID(id string) bool {
-	if found, _ := regexp.MatchString("[^\\d\\s]+", id); found {
-		fmt.Println(ID_CANT_CONTAIN_LETTERS, HINT_FOR_HELP)
-		return false
-	} else if found, _ = regexp.MatchString("\\s+", id); found{
-		fmt.Println(ID_CANT_CONTAIN_SPACES, HINT_FOR_HELP)
+func ChangeDefaultPrintLength() {
+	flag.Parse()
+	if len(flag.Args()) == 1 {
+		SetDefaultPrintLength(flag.Args()[0])
+	} else {
+		fmt.Println(TOO_MANY_ARGUMENTS, HINT_FOR_HELP)
 	}
-	return true
-}
-
-func ValidateIDs (ids []string) bool {
-	for _, id := range ids {
-		if !ValidateID(id){
-			return false
-		}
-	}
-	return true
 }
 
 func AddCommand() {
@@ -43,7 +28,7 @@ func AddCommand() {
 	notes := flag.String("n", "", ADD_N_FLAG_INFO)	
 	flag.Parse()
 	if len(flag.Args()) == 0 {
-		fmt.Println(ZeroArgumentsGiven)
+		fmt.Println(ZERO_ARGUMENTS_GIVEN, HINT_FOR_HELP)
 		return
 	}
 
@@ -51,8 +36,8 @@ func AddCommand() {
 		*notes += "\n"
 	}
 
-	todo := Todo{0, strings.Join(flag.Args(), " "), *priority, *status, *types, *notes}
-	AddTodo(todo)
+	todo := NewTodo(0, time.Now().Unix(), strings.Join(flag.Args(), " "), *priority, *status, *types, *notes)
+	AddTodo(*todo)
 }
 
 func LsCommand() {
@@ -60,21 +45,21 @@ func LsCommand() {
 	status := flag.String("s", "", LS_S_FLAG_INFO)
 	types := flag.String("t", "", LS_T_FLAG_INFO)
 	flag.Parse()
-	Print(GetTodos(Split(*priority), Split(*status), Split(*types)))
+	PrintTodos(false, GetTodos(SplitBySemicolons(*priority), SplitBySemicolons(*status), SplitBySemicolons(*types)))
 }
 
 func LsdCommand() {
 	priority := flag.String("p", "", LSD_P_FLAG_INFO)
 	types := flag.String("t", "", LSD_T_FLAG_INFO)
 	flag.Parse()
-	Print(GetTodos(Split(*priority), []string{"done"}, Split(*types)))
+	PrintTodos(false, GetTodos(SplitBySemicolons(*priority), []string{"done"}, SplitBySemicolons(*types)))
 }
 
 func LswCommand() {
 	priority := flag.String("p", "", LSD_P_FLAG_INFO)
 	types := flag.String("t", "", LSD_T_FLAG_INFO)
 	flag.Parse()
-	Print(GetTodos(Split(*priority), []string{"wip"}, Split(*types)))
+	PrintTodos(false, GetTodos(SplitBySemicolons(*priority), []string{"wip"}, SplitBySemicolons(*types)))
 }
 
 func RmCommand() {
@@ -95,8 +80,12 @@ func ChCommand(field, value string) {
 }
 
 func DetectCommand(args []string) {
-	if len(args) < 2 {
-		fmt.Println("No arguments given.", HINT_FOR_HELP)
+	// fmt.Println(args[1][0], args[1][0] > 47 && args[1][0] < 58)
+	if len(args) == 1 {
+		PrintDefaultAmountOfTodos()
+		return
+	} else if len(args) == 2 && args[1][0] > 47 && args[1][0] < 58 {
+		ChangeDefaultPrintLength()
 		return
 	} else if len(args) == 3 && strings.ToLower(args[1]) == "-h" {			
 		PrintSpecificInfo(args[2])
@@ -129,7 +118,7 @@ func DetectCommand(args []string) {
 	case "chtype":
 		ChCommand("Type", os.Args[2])
 	case "chnote":
-		ChCommand("Note", os.Args[2])
+		ChCommand("Notes", os.Args[2])
 	case "chtask":
 		ChCommand("Task", os.Args[2])
 	case "done":

@@ -6,16 +6,21 @@ import (
 )
 
 const (
-	ADD_P_FLAG_INFO = `Sets the priority of the task, system values (although custom can be typed in): top, mid, low.
-             Default value - MID. Values are case insensitive.`
-	ADD_S_FLAG_INFO = `Sets the state of the task, system values (although custom can be typed in): wip (work in progress), 
-             not-started, done, dead. Default value - NOT_STARTED. Values are case insensitive.`	
+  NO_COMMAND_USAGE = `Prints top n todos. Default - 7. Amount can be changed via todo [NUMBER]
+               e.g.
+               todo 5
+  `
+
+	ADD_P_FLAG_INFO = `Sets the priority of the task: top, mid, low.
+             Default value - TOP. Values are case insensitive.`
+	ADD_S_FLAG_INFO = `Sets the state of the task: wip (work in progress), 
+             not-started, done. Default value - NOT_STARTED. Values are case insensitive.`	
 	ADD_T_FLAG_INFO = `Sets the type of the task. Custom ones must be used, not that if multiple words are used, 
              they must be typed between quotes. Default value - GENERAL.
                e.g.
                todo add -t "School tasks" "Prepare for final maths exam"
                todo add -t Piano "Learn Maple leaf rag"`
-	ADD_N_FLAG_INFO = `Sets custom notes for the task.
+	ADD_N_FLAG_INFO = `Sets custom Note for the task.
                e.g.
                todo add -n "Tasks 1.100 through 1.125" "Solve physics problems"`	
 	ADD_COMMAND_USAGE = `add [OPTIONS] [TASK TEXT]
@@ -26,13 +31,12 @@ const (
         -s   ` + ADD_S_FLAG_INFO + `
         -t   ` + ADD_T_FLAG_INFO + `
         -n   ` + ADD_N_FLAG_INFO + `
-`
+  `
 
-	LS_P_FLAG_INFO = `Specify the priority, case insensitive, if priority contains multiple words, must be typed between quotes.
-             Multiple priorities must be typed between quotes and separated with semicolons. If not given any priorities prints
-             existing priorities.`
-	LS_S_FLAG_INFO = `Specify the state, case insensitive if state contains multiple words, must bet typed between quotes. 
-             Multiple states must be typed between quotes and separated with semicolons. If not given any states prints existing states.`
+	LS_P_FLAG_INFO = `Specify the priority, case insensitive. Multiple priorities must be typed between quotes and
+             separated with semicolons.`
+	LS_S_FLAG_INFO = `Specify the state, case insensitive. Multiple states must be typed between quotes and 
+             separated with semicolons.`
 	LS_T_FLAG_INFO = `Specify the type, case insensitive, if type contains multiple words, must be typed between quotes.
              Multiple types must be typed between quotes and separated with semicolons. If not given any types prints existing types.
                e.g.
@@ -45,11 +49,10 @@ const (
         -p   ` + LS_P_FLAG_INFO + `
         -s   ` + LS_S_FLAG_INFO + `
         -t   ` + LS_T_FLAG_INFO + `
-`
+  `
 
-	LSD_P_FLAG_INFO = `Specify the priority, case insensitive, if priority contains multiple words, must be typed between quotes.
-             Multiple priorities must be typed between quotes and separated with semicolons. If not given any priorities
-             prints existing priorities.`
+	LSD_P_FLAG_INFO = `Specify the priority, case insensitive. Multiple priorities must be typed between quotes and
+             separated with semicolons.`
 	LSD_T_FLAG_INFO = `Specify the type, case insensitive, if type contains multiple words, must be typed between quotes. 
              Multiple types must be typed between quotes and separated with semicolons. If not given any types prints existing types.
                e.g.
@@ -61,11 +64,10 @@ const (
       Options:
         -p   ` + LSD_P_FLAG_INFO + `
         -t   ` + LSD_T_FLAG_INFO + `
-`
+  `
 
-	LSW_P_FLAG_INFO = `Specify the priority, case insensitive, if priority contains multiple words, must be typed between quotes.
-             Multiple priorities must be typed between quotes and separated with semicolons. If not given any priorities
-             prints existing priorities.`
+	LSW_P_FLAG_INFO = `Specify the priority, case insensitive. Multiple priorities must be typed between quotes and
+             separated with semicolons.`
 	LSW_T_FLAG_INFO = `Specify the type, case insensitive, if type contains multiple words, must be typed between quotes. 
              Multiple types must be typed between quotes and separated with semicolons. If not given any types prints existing types.
                e.g.
@@ -77,7 +79,7 @@ const (
       Options:
         -p   ` + LSW_P_FLAG_INFO + `
         -t   ` + LSW_T_FLAG_INFO + `
-`
+  `
 
 	RM_COMMAND_USAGE = `rm [ID] OR del [ID]
       Description:
@@ -121,7 +123,7 @@ const (
 
 	BACKUP_COMMAND_USAGE = `backup
 	  Description:
-	    Makes a backup file of the todo database.
+	    Makes a backup file of the todo database. Stored in $HOME/.todos.db.bak
 	`
 
 	RESTORE_COMMAND_USAGE = `restore
@@ -129,16 +131,22 @@ const (
 	    Restores todo database from backup file.
 	`
 
-	HINT_FOR_HELP = "Type \"todo help\" or \"todo -h\" for help. Type \"todo -h [COMMAND]\" for specific information about the command."
+  NO_TODOS_FOUND = `No todos found. Make sure that .todos.db file is in $HOME and has atleast one entry. 
+If you have made a backup run todo restore. If you are sure that's it's a bug Please file this as a bug to 
+https://github.com/TomSavas/Todo with an explanation of what happened.
+  `
+  
+  TOO_MANY_ARGUMENTS = "Too many arguments given."
+	ZERO_ARGUMENTS_GIVEN = "Zero arguments given."
+  HINT_FOR_HELP = "Type \"todo help\" or \"todo -h\" for help. Type \"todo -h [COMMAND]\" for specific information about the command."
 	ID_CANT_CONTAIN_LETTERS = "ID cannot contain letters."
 	ID_CANT_CONTAIN_SPACES = "ID cannot contain spaces."
 	POSSIBLE_SQL_INJECTION_ERROR = "Do not use \\\" double dashes or \"DROP TABLE\", \"DELETE FROM\"."
 )
 
-var ZeroArgumentsGiven string = "0 arguments given. " + HINT_FOR_HELP
-
-var UsageHelp string = `Usage: todo [COMMAND]
+var UsageHelp string = `A simple todo CLI application written in golang. Usage: todo OR todo [COMMAND]
   Commands:
+    ` + NO_COMMAND_USAGE + `
     ` + ADD_COMMAND_USAGE + `
     ` + LS_COMMAND_USAGE + `
     ` + LSD_COMMAND_USAGE + `
@@ -155,8 +163,10 @@ var UsageHelp string = `Usage: todo [COMMAND]
 
 func PrintSpecificInfo(command string) {
 	switch strings.ToLower(command) {
+  case "":
+    fmt.Println(NO_COMMAND_USAGE)
 	case "add":
-		fmt.Println(ADD_COMMAND_USAGE)
+    fmt.Println(ADD_COMMAND_USAGE)
 	case "ls":
 		fmt.Println(LS_COMMAND_USAGE)
 	case "lsd":
