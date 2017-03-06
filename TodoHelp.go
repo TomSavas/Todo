@@ -11,10 +11,10 @@ const (
                todo 5
   `
 
-	ADD_P_FLAG_INFO = `Sets the priority of the task: top, mid, low.
+	ADD_P_FLAG_INFO = `Sets the priority of the task: top(` + TOP_PRIORITY + `), mid(` + MID_PRIORITY + `), low(` + LOW_PRIORITY + `).
              Default value - TOP. Values are case insensitive.`
-	ADD_S_FLAG_INFO = `Sets the state of the task: wip (work in progress), 
-             not-started, done. Default value - NOT_STARTED. Values are case insensitive.`	
+	ADD_S_FLAG_INFO = `Sets the state of the task: wip (work in progress)(` + WIP_STATUS + `), 
+             not-started(` + NOT_STARTED_STATUS + `), done(` + DONE_STATUS + `). Default value - NOT_STARTED. Values are case insensitive.`	
 	ADD_T_FLAG_INFO = `Sets the type of the task. Custom ones must be used, not that if multiple words are used, 
              they must be typed between quotes. Default value - GENERAL.
                e.g.
