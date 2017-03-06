@@ -7,18 +7,16 @@ import (
 	"strings"
 	"regexp"
 	"os/exec"
-	// "os/user"
 )
 
 var databasePath string
 
 func GetDatabasePath() {
-	// usr, err := user.Current()
-	// if err != nil {
-	// 	fmt.Println(err)
-	// }
-	// databasePath = usr.HomeDir + "/.todos.db"
-	databasePath = "todos.db"
+	usr, err := user.Current()
+	if err != nil {
+		fmt.Println(err)
+	}
+	databasePath = usr.HomeDir + "/.todos.db"
 }
 
 func CheckIfFileExists(filename string) bool {

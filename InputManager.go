@@ -129,6 +129,8 @@ func DetectCommand(args []string) {
 	case "restore":
 		CloseDatabase()
 		RestoreDatabase()
+	case "reset":
+		ResetDatabase()
 	case "help":
 		fallthrough
 	case "-h":

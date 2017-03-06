@@ -6,7 +6,7 @@ import (
 )
 
 const (
-  NO_COMMAND_USAGE = `Prints top n todos. Default - 7. Amount can be changed via todo [NUMBER]
+  NO_COMMAND_USAGE = `todo with no command prints top n todos. Default - 7. Amount can be changed via todo [NUMBER]
                e.g.
                todo 5
   `
@@ -131,6 +131,11 @@ const (
 	    Restores todo database from backup file.
 	`
 
+  RESET_COMMAND_USAGE = `reset
+    Description:
+      Resets database. Advised to run todo backup before this.
+  `
+
   NO_TODOS_FOUND = `No todos found. Make sure that .todos.db file is in $HOME and has atleast one entry. 
 If you have made a backup run todo restore. If you are sure that's it's a bug Please file this as a bug to 
 https://github.com/TomSavas/Todo with an explanation of what happened.
@@ -159,7 +164,8 @@ var UsageHelp string = `A simple todo CLI application written in golang. Usage: 
     ` + CHTASK_COMMAND_USAGE + `
     ` + DONE_COMMAND_USAGE + `
     ` + BACKUP_COMMAND_USAGE + `
-    ` + RESTORE_COMMAND_USAGE
+    ` + RESTORE_COMMAND_USAGE + `
+    ` + RESET_COMMAND_USAGE
 
 func PrintSpecificInfo(command string) {
 	switch strings.ToLower(command) {
