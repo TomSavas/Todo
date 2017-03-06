@@ -142,7 +142,7 @@ func (todo *Todo) ShortPrint(colored bool) {
 
 	fmt.Println(fmt.Sprintf(FULL_SHORT_PRINT_FORM, todo.SelectPrioritySymbol(), todo.SelectStatusSymbol(), 
 		todo.Id, TerribleIndentationHack(6 - len(strconv.Itoa(todo.Id))), todo.PriorityValue,
-		todo.AgeValue + TerribleIndentationHack(10 - len(todo.AgeValue)), types[0], tasks[0]))
+		todo.AgeValue + TerribleIndentationHack(10 - len(todo.AgeValue)), types[0] + TerribleIndentationHack(8 - len(types[0])), tasks[0]))
 
 	for i := 1; i < int(math.Max(float64(len(tasks)), float64(len(types)))); i++ {
 		if i < len(types) && i >= len(tasks) {
@@ -173,7 +173,7 @@ func (todo *Todo) LongPrint(colored bool) {
 		todo.Id, TerribleIndentationHack(6 - len(strconv.Itoa(todo.Id))), 
 		todo.PriorityValue, 
 		TerribleIndentationHack(4-len(strconv.FormatFloat(todo.PriorityValue, 'f', -1, 32))) + "[" + todo.Priority + "]", 
-		todo.AgeValue + TerribleIndentationHack(10 - len(todo.AgeValue)), types[0], tasks[0]))
+		todo.AgeValue + TerribleIndentationHack(10 - len(todo.AgeValue)), types[0] + TerribleIndentationHack(8 - len(types[0])), tasks[0]))
 
 	for i := 1; i < int(math.Max(float64(len(tasks)), float64(len(types)))); i++ {
 		if i < len(types) && i >= len(tasks) {
@@ -201,6 +201,8 @@ func (todo *Todo) LongPrint(colored bool) {
 }
 
 func PrintTodos(short bool, todos []Todo) {
+	Sort(0, len(todos)-1, todos)
+
 	if len(todos) == 0 {
 		fmt.Println(NO_TODOS_FOUND, "\n" + HINT_FOR_HELP)
 		return
@@ -230,8 +232,8 @@ func PrintNTodos(count int) {
 	}
 
 	Sort(0, len(todos)-1, todos)
-	if count > len(todos) - 1 {
-		count = len(todos) - 1
+	if count > len(todos) - 1{
+		count = len(todos)
 	}
 	PrintTodos(true, todos[:count])
 }

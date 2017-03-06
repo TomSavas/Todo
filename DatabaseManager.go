@@ -7,6 +7,7 @@ import (
 	"strings"
 	"regexp"
 	"os/exec"
+	"os/user"	
 )
 
 var databasePath string
