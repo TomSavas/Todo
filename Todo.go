@@ -58,48 +58,46 @@ func (todo *Todo) CalculateAge() string {
 
 //TODO: should be a more elegant solution
 func (todo *Todo) CalculatePriority() float64 {
-	if todo.Status == "DONE" {
-		return float64(0)
-	} else if todo.Status == "WIP" {
-		currentDeltaTime := math.Abs(float64(GetOldestTime(true)) - float64(time.Now().Unix()))
-		deltaTime := math.Abs(float64(GetOldestTime(true)) - float64(todo.Time))
-		ageRatio := 1 - deltaTime / currentDeltaTime
-		if ageRatio == 0 {
-			ageRatio = 1
+	ageRatio := func(isWip bool) float64 {
+		currentDeltaTime := math.Abs(float64(GetOldestTime(isWip)) - float64(time.Now().Unix()))
+		deltaTime := math.Abs(float64(GetOldestTime(isWip)) - float64(todo.Time))
+		ratio := 1 - deltaTime / currentDeltaTime
+		if ratio == 0 {
+			ratio = 1
 		}
-		ageRatio = Round(ageRatio, 0.1)
-		// fmt.Println(todo.Id, "   ", deltaTime, "/", currentDeltaTime, "=", ageRatio)
+		return Round(ratio, 0.1)
+	}
+
+	switch todo.Status {
+	case "WIP":
+		ratio := ageRatio(true)
 		switch todo.Priority { 
 		case "TOP":
-			return ageRatio + 9
+			return ratio + 9
 		case "MID":	
-			return ageRatio * 2 + 7
+			return ratio * 2 + 7
 		case "LOW":
-			return ageRatio + 6
+			return ratio + 6
 		default:
-			return 0;
-		}		
-	} else if todo.Status == "NOT_STARTED" {
-		currentDeltaTime := math.Abs(float64(GetOldestTime(false)) - float64(time.Now().Unix()))
-		deltaTime := math.Abs(float64(GetOldestTime(false)) - float64(todo.Time))
-		ageRatio := 1 - deltaTime / currentDeltaTime
-		ageRatio = Round(ageRatio, 0.1)
-		if ageRatio == 0 {
-			ageRatio = 1
+			return float64(0)
 		}
-		// fmt.Println(todo.Id, "   ", deltaTime, "/", currentDeltaTime, "=", ageRatio)
+	case "NOT_STARTED":
+		ratio := ageRatio(false)
 		switch todo.Priority {
 		case "TOP":
-			return ageRatio * 2 + 4
+			return ratio * 2 + 4
 		case "MID":	
-			return ageRatio * 2 + 2
+			return ratio * 2 + 2
 		case "LOW":
-			return ageRatio + 1
+			return ratio + 1
 		default:
-			return 0
+			return float64(0)
 		}		
+	case "DONE":
+		fallthrough
+	default:
+		return float64(0)
 	}
-	return 0
 }
 
 func (todo *Todo) SelectPrioritySymbol() string {
@@ -128,67 +126,54 @@ func (todo *Todo) SelectStatusSymbol() string {
 	}
 }
 
-func ShortPrintHeader() {
-	fmt.Println(fmt.Sprintf("    " + ToBold(ToUnderline("ID")) + TerribleIndentationHack(4) + ToBold(ToUnderline("PRI\tAGE\t")) + "  " + ToBold(ToUnderline("TYPE\t\tTASK"))))
-}
-
-// Fix this terrible output hacking
-func (todo *Todo) ShortPrint(colored bool) {
-	types := SplitBySemicolons(strings.ToUpper(todo.Type))
-	tasks := SplitTextByNths(todo.Task, 5)
-	if colored {
+func GetPrintParameters(isColored, isShort bool, todo *Todo) (types, tasks []string, fullPrintForm, newlineTypePrintForm, newlineTaskPrintForm, newlineTaskAfterTypePrintForm string) {
+	types = SplitBySemicolons(strings.ToUpper(todo.Type))
+	tasks = SplitTextByNths(todo.Task, 5)
+	
+	if isColored {
 		StartFaint()
 	}
-
-	fmt.Println(fmt.Sprintf(FULL_SHORT_PRINT_FORM, todo.SelectPrioritySymbol(), todo.SelectStatusSymbol(), 
-		todo.Id, TerribleIndentationHack(6 - len(strconv.Itoa(todo.Id))), todo.PriorityValue,
-		todo.AgeValue + TerribleIndentationHack(10 - len(todo.AgeValue)), types[0] + TerribleIndentationHack(8 - len(types[0])), tasks[0]))
-
-	for i := 1; i < int(math.Max(float64(len(tasks)), float64(len(types)))); i++ {
-		if i < len(types) && i >= len(tasks) {
-			fmt.Println(fmt.Sprintf(NEWLINE_TYPE_SHORT_PRINT_FORM, types[i]))
-		} else if i >= len(types) && i < len(tasks) {
-			fmt.Println(fmt.Sprintf(NEWLINE_TASK_SHORT_PRINT_FORM, tasks[i])) 
-		} else {
-			fmt.Print(fmt.Sprintf(NEWLINE_TYPE_SHORT_PRINT_FORM, types[i])) 
-			fmt.Println(fmt.Sprintf(NEWLINE_TASK_AFTER_TYPE_SHORT_PRINT_FORM, tasks[i]))
-		}
+	
+	if isShort {
+		fullPrintForm = FULL_SHORT_PRINT_FORM
+		newlineTypePrintForm = NEWLINE_TYPE_SHORT_PRINT_FORM
+		newlineTaskPrintForm = NEWLINE_TASK_SHORT_PRINT_FORM
+		newlineTaskAfterTypePrintForm = NEWLINE_TASK_AFTER_TYPE_SHORT_PRINT_FORM
+	} else {
+		fullPrintForm = FULL_LONG_PRINT_FORM
+		newlineTypePrintForm = NEWLINE_TYPE_LONG_PRINT_FORM
+		newlineTaskPrintForm = NEWLINE_TASK_LONG_PRINT_FORM
+		newlineTaskAfterTypePrintForm = NEWLINE_TASK_AFTER_TYPE_LONG_PRINT_FORM
 	}
-	EndModifiers()
+
+	return
 }
 
-func LongPrintHeader() {
-	fmt.Println(fmt.Sprintf("    " + ToBold(ToUnderline("ID")) + TerribleIndentationHack(4) + ToBold(ToUnderline("PRIORITY\tAGE\t")) + "  " + ToBold(ToUnderline("TYPE\t\tTASK"))))
+func PrintHeader(isShortVersion bool) {
+	if isShortVersion {
+		fmt.Println(fmt.Sprintf("    " + ToBold(ToUnderline("ID")) + TerribleIndentationHack(4) + ToBold(ToUnderline("PRI\tAGE\t")) + "  " + ToBold(ToUnderline("TYPE\t\tTASK"))))
+	} else {
+		fmt.Println(fmt.Sprintf("    " + ToBold(ToUnderline("ID")) + TerribleIndentationHack(4) + ToBold(ToUnderline("PRIORITY\tAGE\t")) + "  " + ToBold(ToUnderline("TYPE\t\tTASK"))))
+	}
 }
 
-func (todo *Todo) LongPrint(colored bool) {
-	types := SplitBySemicolons(strings.ToUpper(todo.Type))
-	tasks := SplitTextByNths(todo.Task, 5)
-	if colored {
-		StartFaint()
-	}
-
-	fmt.Println(fmt.Sprintf(FULL_LONG_PRINT_FORM, 
-		todo.SelectPrioritySymbol(), todo.SelectStatusSymbol(), 
-		todo.Id, TerribleIndentationHack(6 - len(strconv.Itoa(todo.Id))), 
-		todo.PriorityValue, 
-		TerribleIndentationHack(4-len(strconv.FormatFloat(todo.PriorityValue, 'f', -1, 32))) + "[" + todo.Priority + "]", 
-		todo.AgeValue + TerribleIndentationHack(10 - len(todo.AgeValue)), types[0] + TerribleIndentationHack(8 - len(types[0])), tasks[0]))
-
+func PrintNotFitingTaskAndTypeText(types, tasks []string, fullPrintForm, newlineTypePrintForm, newlineTaskPrintForm, newlineTaskAfterTypePrintForm string) {
 	for i := 1; i < int(math.Max(float64(len(tasks)), float64(len(types)))); i++ {
 		if i < len(types) && i >= len(tasks) {
-			fmt.Println(fmt.Sprintf(NEWLINE_TYPE_LONG_PRINT_FORM, types[i]))
+			fmt.Println(fmt.Sprintf(newlineTypePrintForm, types[i]))
 		} else if i >= len(types) && i < len(tasks) {
-			fmt.Println(fmt.Sprintf(NEWLINE_TASK_LONG_PRINT_FORM, tasks[i])) 
+			fmt.Println(fmt.Sprintf(newlineTaskPrintForm, tasks[i])) 
 		} else {
-			fmt.Print(fmt.Sprintf(NEWLINE_TYPE_LONG_PRINT_FORM, types[i])) 
-			fmt.Println(fmt.Sprintf(NEWLINE_TASK_AFTER_TYPE_LONG_PRINT_FORM, tasks[i]))
+			fmt.Print(fmt.Sprintf(newlineTypePrintForm, types[i])) 
+			fmt.Println(fmt.Sprintf(newlineTaskAfterTypePrintForm, tasks[i]))
 		}
 	}
+}
 
-	if len(todo.Note) != 0 {
+func PrintNote(isColored, isShort bool, todo *Todo) {
+	if len(todo.Note) != 0 && !isShort {
 		fmt.Println(TerribleIndentationHack(4) + ToUnderline("Note"))
-		if colored {
+		if isColored {
 			StartFaint()
 		}
 		notes := SplitTextByNths(todo.Note, 10) 
@@ -196,11 +181,32 @@ func (todo *Todo) LongPrint(colored bool) {
 			fmt.Println(TerribleIndentationHack(4) + value)
 		}
 	}
+}
 
+func (todo *Todo) Print(isColored, isShort bool) {
+	types, tasks, fullPrintForm, newlineTypePrintForm, newlineTaskPrintForm, newlineTaskAfterTypePrintForm := GetPrintParameters(isColored, isShort, todo)
+
+	var firstTodoLine string
+	if isShort {
+		firstTodoLine = fmt.Sprintf(fullPrintForm, todo.SelectPrioritySymbol(), todo.SelectStatusSymbol(), 
+									todo.Id, TerribleIndentationHack(6 - len(strconv.Itoa(todo.Id))), todo.PriorityValue,
+									todo.AgeValue + TerribleIndentationHack(10 - len(todo.AgeValue)), types[0] + TerribleIndentationHack(8 - len(types[0])), tasks[0])
+	} else {
+		firstTodoLine = fmt.Sprintf(fullPrintForm, 
+									todo.SelectPrioritySymbol(), todo.SelectStatusSymbol(), 
+									todo.Id, TerribleIndentationHack(6 - len(strconv.Itoa(todo.Id))), 
+									todo.PriorityValue, 
+									TerribleIndentationHack(4-len(strconv.FormatFloat(todo.PriorityValue, 'f', -1, 32))) + "[" + todo.Priority + "]", 
+									todo.AgeValue + TerribleIndentationHack(10 - len(todo.AgeValue)), types[0] + TerribleIndentationHack(8 - len(types[0])), tasks[0])
+	}
+
+	fmt.Println(firstTodoLine)
+	PrintNotFitingTaskAndTypeText(types, tasks, fullPrintForm, newlineTypePrintForm, newlineTaskPrintForm, newlineTaskAfterTypePrintForm)
+	PrintNote(isColored, isShort, todo)
 	EndModifiers()
 }
 
-func PrintTodos(short bool, todos []Todo) {
+func PrintTodos(isShortVersion bool, todos []Todo) {
 	Sort(0, len(todos)-1, todos)
 
 	if len(todos) == 0 {
@@ -208,18 +214,10 @@ func PrintTodos(short bool, todos []Todo) {
 		return
 	}
 
-	if short {
-		ShortPrintHeader()
-	} else {
-		LongPrintHeader()
-	}
+	PrintHeader(isShortVersion)
 
 	for i, todo := range(todos){
-		if short {
-			todo.ShortPrint(i % 2 != 0)
-		} else {
-			todo.LongPrint(i % 2 != 0)
-		}
+		todo.Print(i % 2 != 0, isShortVersion)
 	}
 }
 
