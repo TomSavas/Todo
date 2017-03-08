@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"regexp"
+	"strconv"
 )
 
 const (
@@ -88,7 +89,12 @@ func TerribleIndentationHack(spaceCount int) string {
 }
 
 func Round(x, unit float64) float64 {
-    return float64(int64(x/unit+0.5)) * unit
+    num := strconv.FormatFloat(float64(int64(x/unit+0.5)) * unit, 'g', 1, 64)
+    if len(num) > 3 {
+    	num = num[0:3]
+    }
+    returnableNum, _ := strconv.ParseFloat(num, 64) 
+    return returnableNum
 }
 
 func SplitBySemicolons(src string) []string {
