@@ -127,7 +127,7 @@ func (todo *Todo) SelectStatusSymbol() string {
 }
 
 func GetPrintParameters(isColored, isShort bool, todo *Todo) (types, tasks []string, fullPrintForm, newlineTypePrintForm, newlineTaskPrintForm, newlineTaskAfterTypePrintForm string) {
-	types = SplitBySemicolons(strings.ToUpper(todo.Type))
+	types = FitTypes(SplitBySemicolons(strings.ToUpper(todo.Type)))
 	tasks = SplitTextByNths(todo.Task, 5)
 	
 	if isColored {
@@ -151,9 +151,9 @@ func GetPrintParameters(isColored, isShort bool, todo *Todo) (types, tasks []str
 
 func PrintHeader(isShortVersion bool) {
 	if isShortVersion {
-		fmt.Println(fmt.Sprintf("    " + ToBold(ToUnderline("ID")) + TerribleIndentationHack(4) + ToBold(ToUnderline("PRI\tAGE\t")) + "  " + ToBold(ToUnderline("TYPE\t\tTASK"))))
+		fmt.Println(fmt.Sprintf("    " + ToBold(ToUnderline("ID")) + TerribleIndentationHack(4) + ToBold(ToUnderline("PRI\tAGE\t")) + "  " + ToBold(ToUnderline("TYPE\t\t\tTASK"))))
 	} else {
-		fmt.Println(fmt.Sprintf("    " + ToBold(ToUnderline("ID")) + TerribleIndentationHack(4) + ToBold(ToUnderline("PRIORITY\tAGE\t")) + "  " + ToBold(ToUnderline("TYPE\t\tTASK"))))
+		fmt.Println(fmt.Sprintf("    " + ToBold(ToUnderline("ID")) + TerribleIndentationHack(4) + ToBold(ToUnderline("PRIORITY\tAGE\t")) + "  " + ToBold(ToUnderline("TYPE\t\t\tTASK"))))
 	}
 }
 
@@ -165,7 +165,7 @@ func PrintNotFitingTaskAndTypeText(types, tasks []string, fullPrintForm, newline
 			fmt.Println(fmt.Sprintf(newlineTaskPrintForm, tasks[i])) 
 		} else {
 			fmt.Print(fmt.Sprintf(newlineTypePrintForm, types[i])) 
-			fmt.Println(fmt.Sprintf(newlineTaskAfterTypePrintForm, tasks[i]))
+			fmt.Println(fmt.Sprintf("%v%v", TerribleIndentationHack(22 - len(types[i])), tasks[i]))
 		}
 	}
 }
@@ -190,14 +190,14 @@ func (todo *Todo) Print(isColored, isShort bool) {
 	if isShort {
 		firstTodoLine = fmt.Sprintf(fullPrintForm, todo.SelectPrioritySymbol(), todo.SelectStatusSymbol(), 
 									todo.Id, TerribleIndentationHack(6 - len(strconv.Itoa(todo.Id))), todo.PriorityValue,
-									todo.AgeValue + TerribleIndentationHack(10 - len(todo.AgeValue)), types[0] + TerribleIndentationHack(8 - len(types[0])), tasks[0])
+									todo.AgeValue + TerribleIndentationHack(10 - len(todo.AgeValue)), types[0] + TerribleIndentationHack(22 - len(types[0])), tasks[0])
 	} else {
 		firstTodoLine = fmt.Sprintf(fullPrintForm, 
 									todo.SelectPrioritySymbol(), todo.SelectStatusSymbol(), 
 									todo.Id, TerribleIndentationHack(6 - len(strconv.Itoa(todo.Id))), 
 									todo.PriorityValue, 
 									TerribleIndentationHack(4-len(strconv.FormatFloat(todo.PriorityValue, 'f', -1, 32))) + "[" + todo.Priority + "]", 
-									todo.AgeValue + TerribleIndentationHack(10 - len(todo.AgeValue)), types[0] + TerribleIndentationHack(8 - len(types[0])), tasks[0])
+									todo.AgeValue + TerribleIndentationHack(10 - len(todo.AgeValue)), types[0] + TerribleIndentationHack(22 - len(types[0])), tasks[0])
 	}
 
 	fmt.Println(firstTodoLine)

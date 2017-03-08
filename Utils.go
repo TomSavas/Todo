@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"regexp"
 	"strconv"
+	"strings"
 )
 
 const (
@@ -16,14 +17,14 @@ const (
 	DONE_STATUS = "\u2713"
 	NOT_STARTED_STATUS = "\u2717"
 
-	FULL_SHORT_PRINT_FORM = "%v %v %v%v%v\t%v%v\t%v"
+	FULL_SHORT_PRINT_FORM = "%v %v %v%v%v\t%v%v%v"
 	NEWLINE_TYPE_SHORT_PRINT_FORM = "\t\t\t  %v"
-	NEWLINE_TASK_SHORT_PRINT_FORM = "\t\t\t\t\t%v"
+	NEWLINE_TASK_SHORT_PRINT_FORM = "\t\t\t\t\t\t%v"
 	NEWLINE_TASK_AFTER_TYPE_SHORT_PRINT_FORM = "\t\t%v"
 
-	FULL_LONG_PRINT_FORM = "%v %v %v%v%v%v\t%v%v\t%v"
+	FULL_LONG_PRINT_FORM = "%v %v %v%v%v%v\t%v%v%v"
 	NEWLINE_TYPE_LONG_PRINT_FORM = "\t\t\t\t  %v"
-	NEWLINE_TASK_LONG_PRINT_FORM = "\t\t\t\t\t\t%v"
+	NEWLINE_TASK_LONG_PRINT_FORM = "\t\t\t\t\t\t\t%v"
 	NEWLINE_TASK_AFTER_TYPE_LONG_PRINT_FORM = "\t\t%v"
 )
 
@@ -61,6 +62,55 @@ func ToItalic(str string) string {
 
 func ToUnderline(str string) string {
 	return "\033[4m" + str + "\033[0m"
+}
+
+func FitTypes(types []string) []string {
+	splitType := func(typee string) []string {
+		splitTypes := []string {""}
+		lineNumber := 0
+		for _, word := range(strings.Split("|" + typee, " ")) {
+
+			for {
+				lineLength := len(splitTypes[lineNumber])
+
+				if lineLength + len(word) > 20 {
+					if 20 - lineLength >= 4 {
+						splitTypes[lineNumber] += word[:20 - lineLength] + "-"
+						word = " " + word[20 - lineLength:]
+					} else {
+						word = " " + word
+					}
+					lineNumber++
+					splitTypes = append(splitTypes, "")
+				} else {
+					break
+				}
+			}
+			splitTypes[lineNumber] += word + " "
+		} 
+		return splitTypes
+	}
+
+	uniteSlices := func (firstSlice, secondSlice []string) []string {
+		returnableSlice := make([]string, len(firstSlice) + len(secondSlice))
+		i := 0
+		for ; i < len(firstSlice); i++ {
+			returnableSlice[i] = firstSlice[i]
+		}
+
+		for ; i - len(firstSlice) < len(secondSlice); i++ {
+			returnableSlice[i] = secondSlice[i - len(firstSlice)]
+		}
+
+		return returnableSlice
+	}
+
+	fittedTypes := []string{}
+	for i, _ := range(types) {
+		fittedTypes = uniteSlices(fittedTypes, splitType(types[i]))
+	}
+
+	return fittedTypes
 }
 
 func SplitTextByNths(str string, wordCount int) []string {
