@@ -110,17 +110,17 @@ func DetectCommand(args []string) {
 	case "chpri":
 		fallthrough
 	case "chpriority":
-		ChCommand("Priority", os.Args[2])
+		ChCommand("Priority", strings.Join(os.Args[2:], " "))
 	case "chst":
 		fallthrough
 	case "chstatus":
-		ChCommand("Status", os.Args[2])
+		ChCommand("Status", strings.Join(os.Args[2:], " "))
 	case "chtype":
-		ChCommand("Type", os.Args[2])
+		ChCommand("Type", strings.Join(os.Args[2:], " "))
 	case "chnote":
-		ChCommand("Notes", os.Args[2])
+		ChCommand("Notes", strings.Join(os.Args[2:], " "))
 	case "chtask":
-		ChCommand("Task", os.Args[2])
+		ChCommand("Task", strings.Join(os.Args[2:], " "))
 	case "done":
 		ChCommand("Status", "done")
 	case "backup":
