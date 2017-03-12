@@ -252,7 +252,7 @@ func ChangeField(id, field, value string) {
 				progress++
 			}
 		} else {
-			if progress > 1 {
+			if progress >= 1 {
 				progress--
 			}
 		}
