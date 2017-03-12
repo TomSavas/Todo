@@ -2,7 +2,9 @@
 
 A simple todo application for terminal written in go. Works on linux/macOS.
 
-[![todoIMG.png](https://s14.postimg.org/7ayq4s1o1/todo_IMG.png)](https://postimg.org/image/l4n2ttu99/)
+[![todo.png](https://s1.postimg.org/5ae0eslnz/todo.png)](https://postimg.org/image/o2pvidi23/)
+
+[![todo_ls.png](https://s18.postimg.org/evqvvg1kp/todo_ls.png)](https://postimg.org/image/pikp0v9px/)
 
 ##Instalation
 
