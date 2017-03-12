@@ -21,6 +21,10 @@ const (
                e.g.
                todo add -t "School tasks" "Prepare for final maths exam"
                todo add -t Piano "Learn Maple leaf rag"`
+  ADD_D_FLAG_INFO = `Sets the time cap for the task in days. Default value - INFINITY.
+               e.g.
+               todo add -d 1.5 -t "School tasks" "Prepare for final maths exam"
+               todo add -d 5 "Learn Maple leaf rag"`
 	ADD_N_FLAG_INFO = `Sets custom Note for the task.
                e.g.
                todo add -n "Tasks 1.100 through 1.125" "Solve physics problems"`	
@@ -117,6 +121,24 @@ const (
         written between quotes and separated with spaces.
 	`
 
+  CHD_COMMAND_USAGE = `chd [ID] [TIME IN DAYS]
+      Description:
+        Overrides the time cap of a todo(s) with given ID(s). Time cap must be given.  Multiple IDs can be given and must be 
+        written between quotes and separated with spaces.
+  `
+
+  PLUS_COMMAND_USAGE = `+ [ID]
+      Description:
+        Adds 10% to progress of a todo(s) with given ID(s). Multiple IDs can be given and must be 
+        written between quotes and separated with spaces.
+  `
+
+  MINUS_COMMAND_USAGE = `- [ID]
+      Description:
+        Removes 10% from progress of a todo(s) with given ID(s). Multiple IDs can be given and must be 
+        written between quotes and separated with spaces.
+  `
+
 	DONE_COMMAND_USAGE = `done [ID]
       Description:
         Sets todo's state to done. Multiple IDs can be given and must be written between quotes and separated with spaces.
@@ -148,6 +170,7 @@ https://github.com/TomSavas/Todo with an explanation of what happened.
 	ID_CANT_CONTAIN_LETTERS = "ID cannot contain letters."
 	ID_CANT_CONTAIN_SPACES = "ID cannot contain spaces."
 	POSSIBLE_SQL_INJECTION_ERROR = "Do not use \\\" double dashes or \"DROP TABLE\", \"DELETE FROM\"."
+  CHANGE_DEFAULT_PRINT_LENGTH_INVALID_NUMBER = "The number must be in 0-99 interval"
 )
 
 var UsageHelp string = `A simple todo CLI application written in golang. Usage: todo OR todo [COMMAND]
@@ -163,6 +186,9 @@ var UsageHelp string = `A simple todo CLI application written in golang. Usage: 
     ` + CHTYPE_COMMAND_USAGE + `
     ` + CHNOTE_COMMAND_USAGE + `
     ` + CHTASK_COMMAND_USAGE + `
+    ` + CHD_COMMAND_USAGE + `
+    ` + PLUS_COMMAND_USAGE + `
+    ` + MINUS_COMMAND_USAGE + `
     ` + DONE_COMMAND_USAGE + `
     ` + BACKUP_COMMAND_USAGE + `
     ` + RESTORE_COMMAND_USAGE + `

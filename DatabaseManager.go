@@ -43,7 +43,7 @@ func CreateDatabaseReference() {
 }
 
 func CreateDatabase() {
-	db.Exec("CREATE TABLE `todos` (`ID`	INTEGER, `Task`	TEXT, `Time`	INTEGER, `Priority`	TEXT, `Status`	TEXT, `Type`	TEXT, `Notes`	TEXT, PRIMARY KEY(ID));")
+	db.Exec("CREATE TABLE `todos` (`ID`	INTEGER, `Task`	TEXT, `Time`	INTEGER, `Priority`	TEXT, `Status`	TEXT, `Type`	TEXT, `TimeCap`	TEXT, `Progress`	TEXT, `Notes`	TEXT, PRIMARY KEY(ID));")
 	db.Exec("CREATE TABLE `parameters` (`ID`	INTEGER, `DefaultLength`	INTEGER, PRIMARY KEY(ID));")
 	db.Exec("INSERT INTO Parameters VALUES(1, 7)")
 }
@@ -107,7 +107,7 @@ func GetTodosFromQuery(query string) []Todo {
 		var rowid int64
 		s.Scan(&rowid, row)
 		// todos = append(todos, Todo{int(rowid), CastToString(row["Task"]), CastToString(row["Priority"]), CastToString(row["Status"]), CastToString(row["Type"]), CastToString(row["Note"])})
-		todos = append(todos, *NewTodo(int(rowid), row["Time"].(int64), CastToString(row["Task"]), CastToString(row["Priority"]), CastToString(row["Status"]), CastToString(row["Type"]), CastToString(row["Notes"])))
+		todos = append(todos, *NewTodo(int(rowid), row["Time"].(int64), CastToString(row["Task"]), CastToString(row["Priority"]), CastToString(row["Status"]), CastToString(row["Type"]), CastToString(row["TimeCap"]), CastToString(row["Progress"]), CastToString(row["Notes"])))
 	}
 
 	return todos
@@ -185,7 +185,7 @@ func AddTodo(todo Todo) {
 		fmt.Println(POSSIBLE_SQL_INJECTION_ERROR)
 		return
 	}
-	db.Exec(fmt.Sprintf("INSERT INTO todos VALUES(%v, \"%v\", %v, \"%v\", \"%v\", \"%v\", \"%v\")", GetLastID() + 1, todo.Task, todo.Time, todo.Priority, todo.Status, todo.Type, todo.Note))
+	db.Exec(fmt.Sprintf("INSERT INTO todos VALUES(%v, \"%v\", %v, \"%v\", \"%v\", \"%v\", \"%v\", \"%v\", \"%v\")", GetLastID() + 1, todo.Task, todo.Time, todo.Priority, todo.Status, todo.Type, todo.TimeCap, todo.Progress, todo.Note))
 }
 
 func RemoveTodo(id string) {
@@ -245,7 +245,21 @@ func ChangeField(id, field, value string) {
 		fmt.Println(POSSIBLE_SQL_INJECTION_ERROR)
 		return
 	}
-	db.Exec("UPDATE todos SET " + field + "=\"" + value + "\" WHERE ID = " + id + ";")	
+	if field == "+Progress" || field == "-Progress" {
+		progress := GetTodosFromQuery("SELECT * FROM todos WHERE ID = " + id)[0].Progress
+		if field[0] == '+' {
+			if progress < 10 {
+				progress++
+			}
+		} else {
+			if progress > 1 {
+				progress--
+			}
+		}
+		db.Exec(fmt.Sprintf("UPDATE todos SET Progress = \"%v\" WHERE ID = %v", progress, id))
+	} else {
+		db.Exec("UPDATE todos SET " + field + "=\"" + value + "\" WHERE ID = " + id + ";")	
+	}
 }
 
 func NaiveSqlInjectionCheck(s string) bool {

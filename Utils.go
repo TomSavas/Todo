@@ -17,16 +17,12 @@ const (
 	DONE_STATUS = "\u2713"
 	NOT_STARTED_STATUS = "\u2717"
 
-	FULL_SHORT_PRINT_FORM = "%v %v %v%v%v\t%v%v%v"
-	NEWLINE_TYPE_SHORT_PRINT_FORM = "\t\t\t  %v"
-	NEWLINE_TASK_SHORT_PRINT_FORM = "\t\t\t\t\t\t%v"
-	NEWLINE_TASK_AFTER_TYPE_SHORT_PRINT_FORM = "\t\t%v"
-
-	FULL_LONG_PRINT_FORM = "%v %v %v%v%v%v\t%v%v%v"
-	NEWLINE_TYPE_LONG_PRINT_FORM = "\t\t\t\t  %v"
-	NEWLINE_TASK_LONG_PRINT_FORM = "\t\t\t\t\t\t\t%v"
-	NEWLINE_TASK_AFTER_TYPE_LONG_PRINT_FORM = "\t\t%v"
+	INFINITY = "\u221E"
 )
+var	NEWLINE_TYPE_LONG_PRINT_FORM string = TerribleIndentationHack(49) + "%v"
+var	NEWLINE_TASK_LONG_PRINT_FORM string = TerribleIndentationHack(70) + "%v"
+var NEWLINE_TYPE_SHORT_PRINT_FORM string = TerribleIndentationHack(34) + "%v"
+var NEWLINE_TASK_SHORT_PRINT_FORM string = TerribleIndentationHack(55) + "%v"
 
 func StartBold() {
 	fmt.Print("\033[1m")
@@ -64,21 +60,32 @@ func ToUnderline(str string) string {
 	return "\033[4m" + str + "\033[0m"
 }
 
-func FitTypes(types []string) []string {
-	splitType := func(typee string) []string {
+func CheckAndFaint(isColored bool) {
+	if isColored {
+		StartFaint()
+	}
+}
+
+func FitStrings(types []string, maxLineLength int, putBarsAtStart bool) []string {
+	splitType := func(typee string, maxLineLength int, putBarsAtStart bool) []string {
 		splitTypes := []string {""}
 		lineNumber := 0
-		for _, word := range(strings.Split("|" + typee, " ")) {
 
+		if putBarsAtStart {
+			typee = "|" + typee
+		}
+
+		for _, word := range(strings.Split(typee, " ")) {
 			for {
 				lineLength := len(splitTypes[lineNumber])
-
-				if lineLength + len(word) > 20 {
-					if 20 - lineLength >= 4 {
-						splitTypes[lineNumber] += word[:20 - lineLength] + "-"
-						word = " " + word[20 - lineLength:]
-					} else {
-						word = " " + word
+				//TODO: only first line is exactly maxLineLength length, other ones are maxLineLength - 1 
+				if lineLength + len(word) > maxLineLength {
+					if maxLineLength - lineLength > maxLineLength / 5 {
+						splitTypes[lineNumber] += word[:maxLineLength - lineLength - 1] + "-" // + FloatToString(float64(maxLineLength)) + " " + FloatToString(float64(lineLength)) + " " + FloatToString(float64(maxLineLength-lineLength))
+						word = word[maxLineLength - lineLength - 1:]
+						if putBarsAtStart {
+							word = " " + word
+						}
 					}
 					lineNumber++
 					splitTypes = append(splitTypes, "")
@@ -107,13 +114,13 @@ func FitTypes(types []string) []string {
 
 	fittedTypes := []string{}
 	for i, _ := range(types) {
-		fittedTypes = uniteSlices(fittedTypes, splitType(types[i]))
+		fittedTypes = uniteSlices(fittedTypes, splitType(types[i], maxLineLength, putBarsAtStart))
 	}
 
 	return fittedTypes
 }
 
-func SplitTextByNths(str string, wordCount int) []string {
+func SplitTextByNWords(str string, wordCount int) []string {
 	strings := []string{}
 	lowerBound, upperBound, spaceCount := 0, 0, 0
 	for i := 0; i < len(str); i++ {
@@ -131,11 +138,15 @@ func SplitTextByNths(str string, wordCount int) []string {
 }
 
 func TerribleIndentationHack(spaceCount int) string {
-	spaces := " "
-	for i := 1; i < spaceCount; i++ {
+	var spaces string
+	for i := 0; i < spaceCount; i++ {
 		spaces += " "
 	}
 	return spaces
+}
+
+func FloatToString(num float64) string {
+	return fmt.Sprintf("%.1f", num)
 }
 
 func Round(x, unit float64) float64 {
